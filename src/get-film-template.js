@@ -1,24 +1,74 @@
-// Возвращает шаблон фильтра
-const getFilmTemplate = () => {
+// Возвращает шаблон фильма
+const getFilmTemplate = (data) => {
+  const {
+    title,
+    releaseYear,
+    description,
+    duration,
+    genre,
+    averageRating,
+    poster,
+    amountOfComments
+  } = data;
+
+  const filmTemplateParts = {};
+
+  const getDuration = () => {
+    const hours = Math.trunc(duration / 60);
+    const minutes = duration % 60;
+
+    if (duration >= 60) {
+      return `${hours}h${minutes ? ` ${minutes}m` : ``}`;
+    } else {
+      return `${minutes}m`;
+    }
+  };
+
+  filmTemplateParts.title = `
+    <h3 class="film-card__title">${title}</h3>
+  `;
+
+  filmTemplateParts.rating = `
+    <p class="film-card__rating">${averageRating}</p>
+  `;
+
+  filmTemplateParts.info = `
+   <p class="film-card__info">
+      <span class="film-card__year">${releaseYear}</span>
+      <span class="film-card__duration">${getDuration()}</span>
+      <span class="film-card__genre">${genre}</span>
+    </p>
+  `;
+
+  filmTemplateParts.poster = `
+    <img src="${poster}" alt="" class="film-card__poster">
+  `;
+
+  filmTemplateParts.description = `
+    <p class="film-card__description">${description}</p>
+  `;
+
+  filmTemplateParts.comments = `
+    <button class="film-card__comments">${amountOfComments} comments</button>
+  `;
+
+  filmTemplateParts.controls = `
+    <form class="film-card__controls">
+      <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist">WL</button>
+      <button class="film-card__controls-item button film-card__controls-item--mark-as-watched">WTCHD</button>
+      <button class="film-card__controls-item button film-card__controls-item--favorite">FAV</button>
+    </form>
+  `;
 
   const filmTemplate = `
     <article class="film-card">
-      <h3 class="film-card__title">The Assassination Of Jessie James By The Coward Robert Ford</h3>
-      <p class="film-card__rating">9.8</p>
-      <p class="film-card__info">
-        <span class="film-card__year">2018</span>
-        <span class="film-card__duration">1h&nbsp;13m</span>
-        <span class="film-card__genre">Comedy</span>
-      </p>
-      <img src="./images/posters/three-friends.jpg" alt="" class="film-card__poster">
-      <p class="film-card__description">A priest with a haunted past and a novice on the threshold of her final vows are sent by the Vatican to investigate the death of a young nun in Romania and confront a malevolent force in the form of a demonic nun.</p>
-      <button class="film-card__comments">13 comments</button>
-
-      <form class="film-card__controls">
-        <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist"><!--Add to watchlist--> WL</button>
-        <button class="film-card__controls-item button film-card__controls-item--mark-as-watched"><!--Mark as watched-->WTCHD</button>
-        <button class="film-card__controls-item button film-card__controls-item--favorite"><!--Mark as favorite-->FAV</button>
-      </form>
+      ${filmTemplateParts.title}
+      ${filmTemplateParts.rating}
+      ${filmTemplateParts.info}
+      ${filmTemplateParts.poster}
+      ${filmTemplateParts.description}
+      ${filmTemplateParts.comments}
+      ${filmTemplateParts.controls}
     </article>
   `;
 
