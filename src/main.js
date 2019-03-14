@@ -1,5 +1,9 @@
 import renderFilters from './render-filters';
 import renderFilms from './render-films';
+import generateFilmsData from './generate-films-data';
+
+const AMOUNT_OF_FILMS = 7;
+const AMOUN_OF_EXTRA_FILMS = 2;
 
 const filtersContainer = document.querySelector(`.main-navigation`);
 const filters = [
@@ -30,7 +34,10 @@ const extraFilmsContainers = document.querySelectorAll(`.films-list--extra .film
 
 renderFilters(filters, filtersContainer);
 
-renderFilms(7, mainFilmsContainer);
+const filmsData = generateFilmsData(AMOUNT_OF_FILMS);
+const extraFilmsData = generateFilmsData(AMOUN_OF_EXTRA_FILMS);
+
+renderFilms(filmsData, mainFilmsContainer);
 extraFilmsContainers.forEach((container) => {
-  renderFilms(2, container);
+  renderFilms(extraFilmsData, container);
 });

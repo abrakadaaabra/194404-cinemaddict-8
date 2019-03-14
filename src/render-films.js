@@ -1,15 +1,34 @@
-import generateFilmsData from './generate-films-data';
-import getFilmTemplate from './get-film-template';
+import Film from './classes/film';
+import FilmDetailsPopup from './classes/film-details-popup';
 
-// Отрисовывает указанное количество карточек фильмов amount в dom-элемент container
-const renderFilms = (amount, container) => {
-  const filmsTemplate = document.createElement(`template`);
+const renderFilm = (data) => {
+  const film = new Film(data);
+  const filmElement = film.render();
 
-  generateFilmsData(amount).forEach((filmData) => {
-    filmsTemplate.innerHTML += getFilmTemplate(filmData);
+  const filmDetailsPopup = new FilmDetailsPopup(data);
+
+  film.onCommentsBlockClick = () => {
+    filmDetailsPopup.render();
+    document.body.appendChild(filmDetailsPopup.element);
+  };
+
+  filmDetailsPopup.onCloseBtnClick = () => {
+    filmDetailsPopup.element.remove();
+    filmDetailsPopup.unrender();
+  };
+
+  return filmElement;
+};
+
+const renderFilms = (filmsData, container) => {
+  const fragment = document.createDocumentFragment();
+
+  filmsData.map((data) => {
+    const element = renderFilm(data);
+    fragment.appendChild(element);
   });
 
-  container.appendChild(filmsTemplate.content.cloneNode(true));
+  container.appendChild(fragment);
 };
 
 export default renderFilms;

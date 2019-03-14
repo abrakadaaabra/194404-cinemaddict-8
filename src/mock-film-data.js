@@ -70,6 +70,17 @@ const countries = [
   `Germany`
 ];
 
+const comments = [
+  {
+    text: `Simply incredible. Never before have I seen a 3 hour movie that didn't seem like 3 hours. I read the Lord of the Rings very recently and I was surprised at how similar Peter Jackson's vision was to my own.`,
+    reaction: `😐`
+  },
+  {
+    text: `Here is one film that lived up to its hype, and by the time I saw it after it had arrived at the video stores, I had heard and read a ton of things about it, and seen all the awards it had received, and expected a lot. To my surprise, it did not disappoint.`,
+    reaction: `😀`
+  },
+];
+
 const basePostersPath = `./images/posters`;
 const posters = [
   `${basePostersPath}/accused.jpg`,
@@ -80,6 +91,13 @@ const posters = [
   `${basePostersPath}/three-friends.jpg`
 ];
 
+const emojis = [
+  `😐`,
+  `😴`,
+  `😐`,
+  `😀`
+];
+
 const mockFilmData = {
   titles,
   actors,
@@ -87,7 +105,9 @@ const mockFilmData = {
   genres,
   ageLimits,
   countries,
-  posters
+  comments,
+  posters,
+  emojis
 };
 
 export default mockFilmData;
