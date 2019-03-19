@@ -1,37 +1,19 @@
-class FilmDetailsPopup {
+import FilmComponent from "./film-component";
+
+class FilmDetailsPopup extends FilmComponent {
   constructor(data) {
-    this._title = data.title;
-    this._originalTitle = data.originalTitle;
-    this._releaseYear = data.releaseYear;
-    this._cast = data.cast;
-    this._description = data.description;
-    this._duration = data.duration;
-    this._amountOfSeasons = data.amountOfSeasons;
-    this._amountOfEpisodes = data.amountOfEpisodes;
-    this._genre = data.genre;
-    this._ageLimit = data.ageLimit;
-    this._premiereDate = data.premiereDate;
-    this._dvdReleaseDate = data.dvdReleaseDate;
-    this._rating = data.rating;
-    this._averageRating = data.averageRating;
-    this._country = data.country;
-    this._isFavorite = data.isFavorite;
-    this._isWatched = data.isWatched;
-    this._inWatchlist = data.inWatchlist;
+    super(data);
 
-    this._comments = data.comments;
-    this._poster = data.poster;
-  }
-
-  get element() {
-    return this._element;
+    this._clickCloseBtnHandler = this._clickCloseBtnHandler.bind(this);
   }
 
   set onCloseBtnClick(handler) {
     this._onCloseBtnClick = handler;
   }
 
-  get template() {
+  get _template() {
+    const getCast = () => `${this._cast.join(`, `)}.`;
+
     const getFormattedDate = (timestamp) => {
       const date = new Date(timestamp);
 
@@ -44,7 +26,7 @@ class FilmDetailsPopup {
       return formattedDate;
     };
 
-    const commentsTemplate = this._comments.map((comment) => `
+    const commentsListItems = () => this._comments.map((comment) => `
       <li class="film-details__comment">
         <span class="film-details__comment-emoji">${comment.reaction}</span>
         <div>
@@ -56,6 +38,20 @@ class FilmDetailsPopup {
         </div>
       </li>
     `).join(``);
+
+    const ratingInputs = () => {
+      const amountOfVariants = 9;
+      let ratingInputsTemplate = ``;
+
+      for (let i = 1; i <= amountOfVariants; i++) {
+        ratingInputsTemplate += `
+          <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"${this._rating === i ? ` checked` : ``} value="${i}" id="rating-${i}">
+          <label class="film-details__user-rating-label" for="rating-${i}">${i}</label>
+        `;
+      }
+
+      return ratingInputsTemplate;
+    };
 
     const filmDetailsPopupTemplate = `
       <section class="film-details">
@@ -91,7 +87,7 @@ class FilmDetailsPopup {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Actors</td>
-                  <td class="film-details__cell">${this._cast.join(`, `)}</td>
+                  <td class="film-details__cell">${getCast()}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
@@ -128,7 +124,7 @@ class FilmDetailsPopup {
           <section class="film-details__comments-wrap">
             <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this._comments.length}</span></h3>
             <ul class="film-details__comments-list">
-              ${commentsTemplate}
+              ${commentsListItems()}
             </ul>
             <div class="film-details__new-comment">
               <div>
@@ -168,33 +164,7 @@ class FilmDetailsPopup {
                 <p class="film-details__user-rating-feelings">How you feel it?</p>
 
                 <div class="film-details__user-rating-score">
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
-                  <label class="film-details__user-rating-label" for="rating-1">1</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
-                  <label class="film-details__user-rating-label" for="rating-2">2</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
-                  <label class="film-details__user-rating-label" for="rating-3">3</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
-                  <label class="film-details__user-rating-label" for="rating-4">4</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5" checked>
-                  <label class="film-details__user-rating-label" for="rating-5">5</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
-                  <label class="film-details__user-rating-label" for="rating-6">6</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
-                  <label class="film-details__user-rating-label" for="rating-7">7</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
-                  <label class="film-details__user-rating-label" for="rating-8">8</label>
-
-                  <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9">
-                  <label class="film-details__user-rating-label" for="rating-9">9</label>
-
+                  ${ratingInputs()}
                 </div>
               </section>
             </div>
@@ -212,33 +182,12 @@ class FilmDetailsPopup {
     }
   }
 
-  _createElement(template) {
-    const tmpElement = document.createElement(`div`);
-    tmpElement.innerHTML = template;
-
-    const element = tmpElement.firstElementChild;
-
-    return element;
-  }
-
-  render() {
-    this._element = this._createElement(this.template);
-    this._bind();
-
-    return this._element;
-  }
-
-  unrender() {
-    this._unbind();
-    this._element = null;
-  }
-
-  _bind() {
+  _createListeners() {
     const comments = this._element.querySelector(`.film-details__close-btn`);
-    comments.addEventListener(`click`, this._clickCloseBtnHandler.bind(this));
+    comments.addEventListener(`click`, this._clickCloseBtnHandler);
   }
 
-  _unbind() {
+  _removeListeners() {
     const comments = this._element.querySelector(`.film-details__close-btn`);
     comments.removeEventListener(`click`, this._clickCloseBtnHandler);
   }

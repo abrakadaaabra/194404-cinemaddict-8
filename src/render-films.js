@@ -5,16 +5,17 @@ const renderFilm = (data) => {
   const film = new Film(data);
   const filmElement = film.render();
 
-  const filmDetailsPopup = new FilmDetailsPopup(data);
-
   film.onCommentsBlockClick = () => {
-    filmDetailsPopup.render();
-    document.body.appendChild(filmDetailsPopup.element);
-  };
+    if (!film.popup) {
+      film.popup = new FilmDetailsPopup(data);
 
-  filmDetailsPopup.onCloseBtnClick = () => {
-    filmDetailsPopup.element.remove();
-    filmDetailsPopup.unrender();
+      film.popup.onCloseBtnClick = () => {
+        film.popup.unrender();
+      };
+    }
+
+    film.popup.render();
+    document.body.appendChild(film.popup.element);
   };
 
   return filmElement;

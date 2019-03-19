@@ -1,37 +1,17 @@
-class Film {
+import FilmComponent from "./film-component";
+
+class Film extends FilmComponent {
   constructor(data) {
-    this._title = data.title;
-    this._originalTitle = data.originalTitle;
-    this._releaseYear = data.releaseYear;
-    this._cast = data.cast;
-    this._description = data.description;
-    this._duration = data.duration;
-    this._amountOfSeasons = data.amountOfSeasons;
-    this._amountOfEpisodes = data.amountOfEpisodes;
-    this._genre = data.genre;
-    this._ageLimit = data.ageLimit;
-    this._premiereDate = data.premiereDate;
-    this._dvdReleaseDate = data.dvdReleaseDate;
-    this._rating = data.rating;
-    this._averageRating = data.averageRating;
-    this._country = data.country;
-    this._isFavorite = data.isFavorite;
-    this._isWatched = data.isWatched;
-    this._inWatchlist = data.inWatchlist;
+    super(data);
 
-    this._comments = data.comments;
-    this._poster = data.poster;
-  }
-
-  get element() {
-    return this._element;
+    this._clickCommentsBlockHandler = this._clickCommentsBlockHandler.bind(this);
   }
 
   set onCommentsBlockClick(handler) {
     this._onCommentsBlockClick = handler;
   }
 
-  get template() {
+  get _template() {
     const getDuration = () => {
       const hours = Math.trunc(this._duration / 60);
       const minutes = this._duration % 60;
@@ -72,33 +52,12 @@ class Film {
     }
   }
 
-  _createElement(template) {
-    const tmpElement = document.createElement(`div`);
-    tmpElement.innerHTML = template;
-
-    const element = tmpElement.firstElementChild;
-
-    return element;
-  }
-
-  render() {
-    this._element = this._createElement(this.template);
-    this._bind();
-
-    return this._element;
-  }
-
-  unrender() {
-    this._unbind();
-    this._element = null;
-  }
-
-  _bind() {
+  _createListeners() {
     const comments = this._element.querySelector(`.film-card__comments`);
-    comments.addEventListener(`click`, this._clickCommentsBlockHandler.bind(this));
+    comments.addEventListener(`click`, this._clickCommentsBlockHandler);
   }
 
-  _unbind() {
+  _removeListeners() {
     const comments = this._element.querySelector(`.film-card__comments`);
     comments.removeEventListener(`click`, this._clickCommentsBlockHandler);
   }
