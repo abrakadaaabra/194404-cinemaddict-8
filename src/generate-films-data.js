@@ -4,8 +4,7 @@ import {
   getRandomIntegerInRange,
   getRandomBoolean,
   getRandomArrayElement,
-  getRandomArrayElements,
-  getRandomDateInRange,
+  getRandomArrayElements
 } from './utils';
 
 const getFilmDescription = () => {
@@ -18,7 +17,7 @@ const getFilmDescription = () => {
 const generateFilmData = () => ({
   title: getRandomArrayElement(data.titles),
   originalTitle: getRandomArrayElement(data.titles),
-  releaseYear: getRandomIntegerInRange(2019, 1960),
+  releaseYear: Date.now(),
   cast: getRandomArrayElements(data.actors, getRandomIntegerInRange(data.actors.length)),
   description: getFilmDescription(),
   duration: getRandomIntegerInRange(180, 60),
@@ -26,8 +25,8 @@ const generateFilmData = () => ({
   amountOfEpisodes: getRandomIntegerInRange(150),
   genre: getRandomArrayElement(data.genres),
   ageLimit: getRandomArrayElement(data.ageLimits),
-  premiereDate: getRandomDateInRange(7),
-  dvdReleaseDate: getRandomDateInRange(10),
+  premiereDate: Date.now(),
+  dvdReleaseDate: Date.now(),
   rating: getRandomIntegerInRange(11, 1),
   averageRating: getRandomNumber(11, 1).toFixed(1),
   country: getRandomArrayElement(data.countries),

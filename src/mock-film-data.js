@@ -70,15 +70,18 @@ const countries = [
   `Germany`
 ];
 
-const comments = [
-  {
-    text: `Simply incredible. Never before have I seen a 3 hour movie that didn't seem like 3 hours. I read the Lord of the Rings very recently and I was surprised at how similar Peter Jackson's vision was to my own.`,
-    reaction: `😐`
-  },
-  {
-    text: `Here is one film that lived up to its hype, and by the time I saw it after it had arrived at the video stores, I had heard and read a ton of things about it, and seen all the awards it had received, and expected a lot. To my surprise, it did not disappoint.`,
-    reaction: `😀`
-  },
+const comments = [{
+  emoji: `neutral-face`,
+  text: `Simply incredible. Never before have I seen a 3 hour movie that didn't seem like 3 hours. I read the Lord of the Rings very recently and I was surprised at how similar Peter Jackson's vision was to my own.`,
+  author: `Steve`,
+  date: Date.now()
+},
+{
+  emoji: `grinning`,
+  text: `Here is one film that lived up to its hype, and by the time I saw it after it had arrived at the video stores, I had heard and read a ton of things about it, and seen all the awards it had received, and expected a lot. To my surprise, it did not disappoint.`,
+  author: `John`,
+  date: Date.now()
+},
 ];
 
 const basePostersPath = `./images/posters`;
@@ -91,12 +94,11 @@ const posters = [
   `${basePostersPath}/three-friends.jpg`
 ];
 
-const emojis = [
-  `😐`,
-  `😴`,
-  `😐`,
-  `😀`
-];
+const Emojis = {
+  'sleeping': `😴`,
+  'neutral-face': `😐`,
+  'grinning': `😀`,
+};
 
 const mockFilmData = {
   titles,
@@ -107,7 +109,7 @@ const mockFilmData = {
   countries,
   comments,
   posters,
-  emojis
+  Emojis
 };
 
 export default mockFilmData;

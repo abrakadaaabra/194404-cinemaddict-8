@@ -30,6 +30,18 @@ class FilmComponent extends Component {
       throw new Error(`Can't instantiate TaskComponent, only concrete one.`);
     }
   }
+
+  _updateState() {}
+
+  update(data) {
+    this._rating = data.rating;
+    this._comments = data.comments;
+    this._isFavorite = data.isFavorite;
+    this._isWatched = data.isWatched;
+    this._inWatchlist = data.inWatchlist;
+
+    this._updateState();
+  }
 }
 
 export default FilmComponent;

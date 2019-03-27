@@ -9,7 +9,12 @@ const renderFilm = (data) => {
     if (!film.popup) {
       film.popup = new FilmDetailsPopup(data);
 
-      film.popup.onCloseBtnClick = () => {
+      film.popup.onCloseBtnClick = (newData) => {
+        Object.assign(data, newData);
+
+        film.update(data);
+        film.updateElement();
+
         film.popup.unrender();
       };
     }
