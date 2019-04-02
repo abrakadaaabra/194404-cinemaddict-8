@@ -1,35 +1,24 @@
 import FilmComponent from "./film-component";
+import moment from "moment";
 
 class Film extends FilmComponent {
   constructor(data) {
     super(data);
 
+    this._onCommentsBlockClick = null;
+
     this._clickCommentsBlockHandler = this._clickCommentsBlockHandler.bind(this);
   }
 
-  set onCommentsBlockClick(handler) {
-    this._onCommentsBlockClick = handler;
-  }
-
   get _template() {
-    const getDuration = () => {
-      const hours = Math.trunc(this._duration / 60);
-      const minutes = this._duration % 60;
-
-      if (this._duration >= 60) {
-        return `${hours}h${minutes ? ` ${minutes}m` : ``}`;
-      } else {
-        return `${minutes}m`;
-      }
-    };
 
     const filmTemplate = `
       <article class="film-card">
         <h3 class="film-card__title">${this._title}</h3>
         <p class="film-card__rating">${this._averageRating}</p>
         <p class="film-card__info">
-          <span class="film-card__year">${this._releaseYear}</span>
-          <span class="film-card__duration">${getDuration()}</span>
+          <span class="film-card__year">${moment(this._releaseYear).format(`YYYY`)}</span>
+          <span class="film-card__duration">${moment.duration(this._duration, `minutes`).hours()}h ${moment.duration(this._duration, `minutes`).minutes()}m</span>
           <span class="film-card__genre">${this._genre}</span>
         </p>
         <img src="${this._poster}" alt="" class="film-card__poster">
@@ -46,20 +35,33 @@ class Film extends FilmComponent {
     return filmTemplate;
   }
 
+  set onCommentsBlockClick(handler) {
+    this._onCommentsBlockClick = handler;
+  }
+
   _clickCommentsBlockHandler() {
     if (this._onCommentsBlockClick && typeof this._onCommentsBlockClick === `function`) {
       this._onCommentsBlockClick();
     }
   }
 
-  _createListeners() {
+  _addEventHandlers() {
     const comments = this._element.querySelector(`.film-card__comments`);
     comments.addEventListener(`click`, this._clickCommentsBlockHandler);
   }
 
-  _removeListeners() {
+  _removeEventHandlers() {
     const comments = this._element.querySelector(`.film-card__comments`);
     comments.removeEventListener(`click`, this._clickCommentsBlockHandler);
+  }
+
+  updateElement() {
+    const newElement = this._createElement();
+
+    this._removeEventHandlers();
+    this._element.parentNode.replaceChild(newElement, this._element);
+    this._element = newElement;
+    this._addEventHandlers();
   }
 }
 
