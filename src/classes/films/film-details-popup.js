@@ -1,24 +1,41 @@
-import mockFilmData from '../mock-film-data';
+import mockFilmData from '../../mock/mock-film-data';
 import FilmComponent from "./film-component";
 import moment from "moment";
 
+import {
+  isControlKey,
+  isCmdKey,
+  isEnterKey
+} from '../../utils/keyboard-utils';
+
+/**
+ * Класс попапа с подробной информацией о фильме
+ * @class FilmDetailsPopup
+ * @extends {FilmComponent}
+ */
 class FilmDetailsPopup extends FilmComponent {
+
+  /**
+   * Создает экземпляр попапа фильма
+   * @param {Object} data - данные о фильме
+   */
   constructor(data) {
     super(data);
 
     this._onCloseBtnClick = null;
 
     this._clickCloseBtnHandler = this._clickCloseBtnHandler.bind(this);
-    this._addCommentHandler = this._addCommentHandler.bind(this);
     this._changeCommentEmojiHandler = this._changeCommentEmojiHandler.bind(this);
+    this._submitCommentHandler = this._submitCommentHandler.bind(this);
     this._clickUserRatingInputHandler = this._clickUserRatingInputHandler.bind(this);
   }
 
-  get _template() {
-    const getCast = () => `${this._cast.join(`, `)}.`;
-
-    // TODO: заменить Date.now() на дату публикация комментария и добавить ее в моковые данные
-    const commentsListItems = () => this._comments.map((comment) => `
+  /**
+   * Возвращает шаблон комментариев к фильму
+   * @return {string}
+   */
+  _getCommentsTemplate() {
+    const comments = this._comments.map((comment) => `
       <li class="film-details__comment">
         <span class="film-details__comment-emoji">${mockFilmData.Emojis[comment.emoji]}</span>
         <div>
@@ -31,21 +48,37 @@ class FilmDetailsPopup extends FilmComponent {
       </li>
     `).join(``);
 
-    const ratingInputs = () => {
-      const amountOfVariants = 9;
-      let ratingInputsTemplate = ``;
+    return comments;
+  }
 
-      for (let i = 1; i <= amountOfVariants; i++) {
-        ratingInputsTemplate += `
+  /**
+   * Возвращает шаблон выбора оценки фильма
+   * @return {string}
+   */
+  _getUserRatingScoreTemplate() {
+    const AMOUNT_OF_VARIANTS = 9;
+    let inputs = ``;
+
+    for (let i = 1; i <= AMOUNT_OF_VARIANTS; i++) {
+      inputs += `
           <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"${this._rating === i ? ` checked` : ``} value="${i}" id="rating-${i}">
           <label class="film-details__user-rating-label" for="rating-${i}">${i}</label>
         `;
-      }
+    }
 
-      return ratingInputsTemplate;
-    };
+    return inputs;
+  }
 
-    // TODO: заменить Date.now() на дату выхода, продолжительность фильма в минутах
+  /**
+   * Возвращает шаблон попапа фильма
+   * @return {string}
+   */
+  get _template() {
+    const getCast = () => `${this._cast.join(`, `)}.`;
+    const getGenres = () => this._genre.map((genre) => `
+      <span class="film-details__genre">${genre}</span>
+    `).join(``);
+
     const filmDetailsPopupTemplate = `
       <section class="film-details">
         <form class="film-details__inner" action="" method="get">
@@ -84,11 +117,11 @@ class FilmDetailsPopup extends FilmComponent {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
-                  <td class="film-details__cell">${moment(Date.now()).format(`D MMMM YYYY`)}</td>
+                  <td class="film-details__cell">${moment(this._premiereDate).format(`DD MMMM YYYY`)}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>
-                  <td class="film-details__cell">${moment(Date.now()).format(`mm`)}min</td>
+                  <td class="film-details__cell">${moment.duration(this._duration, `minutes`).asMinutes()} min</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Country</td>
@@ -97,7 +130,7 @@ class FilmDetailsPopup extends FilmComponent {
                 <tr class="film-details__row">
                   <td class="film-details__term">Genres</td>
                   <td class="film-details__cell">
-                    <span class="film-details__genre">${this._genre}</span>
+                    ${getGenres()}
                   </td>
                 </tr>
               </table>
@@ -116,9 +149,7 @@ class FilmDetailsPopup extends FilmComponent {
           </section>
           <section class="film-details__comments-wrap">
             <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this._comments.length}</span></h3>
-            <ul class="film-details__comments-list">
-              ${commentsListItems()}
-            </ul>
+            <ul class="film-details__comments-list">${this._getCommentsTemplate()}</ul>
             <div class="film-details__new-comment">
               <div>
                 <label for="add-emoji" class="film-details__add-emoji-label">😐</label>
@@ -155,10 +186,7 @@ class FilmDetailsPopup extends FilmComponent {
                 <h3 class="film-details__user-rating-title">${this._title}</h3>
 
                 <p class="film-details__user-rating-feelings">How you feel it?</p>
-
-                <div class="film-details__user-rating-score">
-                  ${ratingInputs()}
-                </div>
+                <div class="film-details__user-rating-score">${this._getUserRatingScoreTemplate()}</div>
               </section>
             </div>
           </section>
@@ -169,22 +197,33 @@ class FilmDetailsPopup extends FilmComponent {
     return filmDetailsPopupTemplate;
   }
 
+  /**
+   * Возвращает обновленные данные о фильме
+   * @return {object}
+   */
   _getNewFilmData() {
     const newFilmPopupData = {
       rating: this._rating,
       comments: this._comments,
       isFavorite: this._isFavorite,
-      isWatched: this._isFavorite,
+      isWatched: this._isWatched,
       inWatchlist: this._inWatchlist
     };
 
     return newFilmPopupData;
   }
 
-  set onCloseBtnClick(handler) {
-    this._onCloseBtnClick = handler;
+  /**
+   * Задает колбэк закрытия попапа фильма
+   * @param {Function} callback - колбэк
+   */
+  set onCloseBtnClick(callback) {
+    this._onCloseBtnClick = callback;
   }
 
+  /**
+   * Обработчик клика по кнопке закрытия попапа
+   */
   _clickCloseBtnHandler() {
     const newFilmData = this._getNewFilmData();
 
@@ -193,44 +232,78 @@ class FilmDetailsPopup extends FilmComponent {
     }
   }
 
-  _addCommentHandler(event) {
-    const isControlOrCmdKey = event.ctrlKey || event.metaKey || event.keyCode === 91 || event.which === 91;
-    const isEnter = event.keyCode === 13 || event.which === 13;
+  /**
+   * Сбрасывает форму добавления комментариев в изначальное состояние
+   */
+  _resetNewCommentForm() {
+    const newCommentInput = this._element.querySelector(`.film-details__comment-input`);
+    const newCommentEmojiPicker = this._element.querySelector(`.film-details__add-emoji-label`);
 
-    if (isControlOrCmdKey && isEnter) {
-      const emoji = this._element.querySelector(`.film-details__emoji-item:checked`).value;
-      const text = event.currentTarget.value;
-      const author = `User name`;
-      const date = Date.now();
-
-      const newComment = {
-        emoji,
-        text,
-        author,
-        date
-      };
-
-      this._comments.push(newComment);
-
-      event.currentTarget.value = ``;
-      const emojiPicker = this._element.querySelector(`.film-details__add-emoji-label`);
-      emojiPicker.innerHTML = mockFilmData.Emojis[`neutral-face`];
-      event.target.blur();
-
-      // TODO: сразу же обновлять список комментариев в DOM
-    }
+    newCommentInput.value = ``;
+    newCommentInput.blur();
+    newCommentEmojiPicker.innerHTML = mockFilmData.Emojis[`neutral-face`];
   }
 
+  /**
+   * Перерисовывает список комментариев
+   */
+  _updateCommentsList() {
+    const comments = this.element.querySelector(`.film-details__comments-list`);
+    comments.innerHTML = `${this._getCommentsTemplate()}`;
+  }
+
+  /**
+   *
+   * Обработчик клика по эмоджи реакции на фильм
+   * @param {event} event
+   */
   _changeCommentEmojiHandler(event) {
     const emojiPicker = this._element.querySelector(`.film-details__add-emoji-label`);
     emojiPicker.innerHTML = mockFilmData.Emojis[event.target.value];
   }
 
-  _clickUserRatingInputHandler(event) {
-    this._rating = +event.currentTarget.value;
-    // TODO: сразу же обновлять оценку в DOM
+  /**
+   * Обработчик отправки формы добавления комментариев
+   * @param {event} event
+   */
+  _submitCommentHandler(event) {
+    const isControlOrCmdKey = isControlKey(event) || isCmdKey(event);
+    const submitCommentHotkeys = isControlOrCmdKey && isEnterKey(event);
+
+    if (submitCommentHotkeys) {
+
+      this._comments.push({
+        emoji: this._element.querySelector(`.film-details__emoji-item:checked`).value,
+        text: event.currentTarget.value,
+        author: `User name`,
+        date: Date.now()
+      });
+
+      this._resetNewCommentForm();
+      this._updateCommentsList();
+    }
   }
 
+  /**
+   * Перерисовывает блок с оценкой фильма
+   */
+  _updateRating() {
+    const userRating = this._element.querySelector(`.film-details__user-rating`);
+    userRating.innerHTML = `Your rate ${this._rating}`;
+  }
+
+  /**
+   * Обработчик клика по оценке фильма
+   * @param {event} event
+   */
+  _clickUserRatingInputHandler(event) {
+    this._rating = +event.currentTarget.value;
+    this._updateRating();
+  }
+
+  /**
+   * Навешивает обработчики событий на элементы попапа фильма
+   */
   _addEventHandlers() {
     const popupCloseBtn = this._element.querySelector(`.film-details__close-btn`);
     const userRatingInputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
@@ -239,10 +312,13 @@ class FilmDetailsPopup extends FilmComponent {
 
     popupCloseBtn.addEventListener(`click`, this._clickCloseBtnHandler);
     userRatingInputs.forEach((input) => input.addEventListener(`click`, this._clickUserRatingInputHandler));
-    commentInput.addEventListener(`keydown`, this._addCommentHandler);
+    commentInput.addEventListener(`keydown`, this._submitCommentHandler);
     emojiListItems.forEach((emoji) => emoji.addEventListener(`click`, this._changeCommentEmojiHandler));
   }
 
+  /**
+   * Удаляет обработчики события с элементов попапа фильма
+   */
   _removeEventHandlers() {
     const popupCloseBtn = this._element.querySelector(`.film-details__close-btn`);
     const userRatingInputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
@@ -251,18 +327,9 @@ class FilmDetailsPopup extends FilmComponent {
 
     popupCloseBtn.removeEventListener(`click`, this._clickCloseBtnHandler);
     userRatingInputs.forEach((input) => input.removeEventListener(`click`, this._clickUserRatingInputHandler));
-    commentInput.removeEventListener(`keydown`, this._addCommentHandler);
+    commentInput.removeEventListener(`keydown`, this._submitCommentHandler);
     emojiListItems.forEach((emoji) => emoji.removeEventListener(`click`, this._changeCommentEmojiHandler));
   }
-
-  // static createMapper(target) {
-  //   return {
-  //     score: (value) => (target.rating = value),
-  //     favorite: (value) => (target.isFavorite = value),
-  //     watched: (value) => (target.isWatched = value),
-  //     watchlist: (value) => (target.inWatchlist = value),
-  //   };
-  // }
 }
 
 export default FilmDetailsPopup;

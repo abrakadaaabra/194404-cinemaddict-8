@@ -5,8 +5,12 @@ import {
   getRandomBoolean,
   getRandomArrayElement,
   getRandomArrayElements
-} from './utils';
+} from '../utils/utils';
 
+/**
+ * Возвращает описание фильма
+ * @return {string}
+ */
 const getFilmDescription = () => {
   const amountOfSentences = getRandomIntegerInRange(4);
   const description = getRandomArrayElements(data.descriptionSentences, amountOfSentences).join(` `);
@@ -14,6 +18,10 @@ const getFilmDescription = () => {
   return description;
 };
 
+/**
+ * Возвращает объект со сгенерированными данными о фильме
+ * @return {object}
+ */
 const generateFilmData = () => ({
   title: getRandomArrayElement(data.titles),
   originalTitle: getRandomArrayElement(data.titles),
@@ -23,8 +31,9 @@ const generateFilmData = () => ({
   duration: getRandomIntegerInRange(180, 60),
   amountOfSeasons: getRandomIntegerInRange(16),
   amountOfEpisodes: getRandomIntegerInRange(150),
-  genre: getRandomArrayElement(data.genres),
+  genre: getRandomArrayElements(data.genres, getRandomIntegerInRange(data.genres.length)),
   ageLimit: getRandomArrayElement(data.ageLimits),
+  watchingDate: getRandomArrayElement(data.watchingDates),
   premiereDate: Date.now(),
   dvdReleaseDate: Date.now(),
   rating: getRandomIntegerInRange(11, 1),
@@ -38,8 +47,11 @@ const generateFilmData = () => ({
   poster: getRandomArrayElement(data.posters),
 });
 
-
-// Возвращает массив длиной amount, содержащий данные о фильмах
+/**
+ * Возвращает массив содержащий данные о фильмах
+ * @param {number} amount - количество фильмов
+ * @return {array}
+ */
 const generateFilmsData = (amount) => {
   const filmsData = [];
 

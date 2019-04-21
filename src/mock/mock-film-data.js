@@ -70,6 +70,20 @@ const countries = [
   `Germany`
 ];
 
+const watchingDates = [
+  1555787940610,
+  1555707600000,
+  1555534800000,
+  1555448400000,
+  1554930000000,
+  1554843600000,
+  1552165200000,
+  1552078800000,
+  1524171600000,
+  1524344400000,
+  1524430800000
+];
+
 const comments = [{
   emoji: `neutral-face`,
   text: `Simply incredible. Never before have I seen a 3 hour movie that didn't seem like 3 hours. I read the Lord of the Rings very recently and I was surprised at how similar Peter Jackson's vision was to my own.`,
@@ -84,7 +98,7 @@ const comments = [{
 },
 ];
 
-const basePostersPath = `./images/posters`;
+const basePostersPath = `/images/posters`;
 const posters = [
   `${basePostersPath}/accused.jpg`,
   `${basePostersPath}/blackmail.jpg`,
@@ -107,6 +121,7 @@ const mockFilmData = {
   genres,
   ageLimits,
   countries,
+  watchingDates,
   comments,
   posters,
   Emojis
