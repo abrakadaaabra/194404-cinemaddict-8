@@ -9,8 +9,9 @@ module.exports = {
   },
   devtool: 'source-map',
   devServer: {
+    port: 8081,
     contentBase: path.join(__dirname, 'public'),
-    publicPath: 'http://localhost:8080/',
+    publicPath: 'http://localhost:8081/',
     hot: true,
     compress: true
   }

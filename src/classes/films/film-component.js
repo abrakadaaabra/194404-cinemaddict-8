@@ -1,6 +1,17 @@
-import Component from "./component";
+import Component from "../component";
 
+/**
+ * Базовый класс для компонент карточки фильма и попапа с информацией о фильме,
+ * содержащий общую для них логику и поля
+ * @class FilmComponent
+ * @extends {Component}
+ */
 class FilmComponent extends Component {
+
+  /**
+   * Создает экземпляр компонента карточки фильма или попапа
+   * @param {object} data - объект с информацией о фильме
+   */
   constructor(data) {
     super();
 
@@ -31,8 +42,15 @@ class FilmComponent extends Component {
     }
   }
 
+  /**
+   * Обновляет состояние компонента
+   */
   _updateState() {}
 
+  /**
+   * Обновляет поля компонента на основе новых данных
+   * @param {object} data - обновленные данные о фильме
+   */
   update(data) {
     this._rating = data.rating;
     this._comments = data.comments;
