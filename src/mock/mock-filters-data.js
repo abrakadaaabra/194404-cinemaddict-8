@@ -1,7 +1,3 @@
-import {
-  getRandomIntegerInRange
-} from "../utils/utils";
-
 const filters = [{
   caption: `All movies`,
   type: `all`
@@ -9,22 +5,18 @@ const filters = [{
 {
   caption: `Watchlist`,
   type: `in-watchlist`,
-  count: getRandomIntegerInRange(50)
+  // count: getRandomIntegerInRange(50)
 },
 {
   caption: `History`,
   type: `is-watched`,
-  count: getRandomIntegerInRange(50)
+  // count: getRandomIntegerInRange(50)
 },
 {
   caption: `Favorites`,
   type: `in-favorites`,
-  count: getRandomIntegerInRange(50)
-},
-  // {
-  //   caption: `Stats`,
-  //   isAdditional: true
-  // }
+  // count: getRandomIntegerInRange(50)
+}
 ];
 
 export default filters;

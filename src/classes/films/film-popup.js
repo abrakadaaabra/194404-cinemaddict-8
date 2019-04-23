@@ -1,5 +1,5 @@
-import mockFilmData from '../../mock/mock-film-data';
 import FilmComponent from "./film-component";
+import AdapterComment from "../../adapter-comment";
 import moment from "moment";
 
 import {
@@ -8,13 +8,16 @@ import {
   isEnterKey
 } from '../../utils/keyboard-utils';
 
+import {
+  getEmoji
+} from "../../utils/utils";
+
 /**
  * Класс попапа с подробной информацией о фильме
  * @class FilmDetailsPopup
  * @extends {FilmComponent}
  */
-class FilmDetailsPopup extends FilmComponent {
-
+class FilmPopup extends FilmComponent {
   /**
    * Создает экземпляр попапа фильма
    * @param {Object} data - данные о фильме
@@ -22,7 +25,9 @@ class FilmDetailsPopup extends FilmComponent {
   constructor(data) {
     super(data);
 
-    this._onCloseBtnClick = null;
+    this._onClose = null;
+    this._onSubmitComment = null;
+    this._onSubmitRating = null;
 
     this._clickCloseBtnHandler = this._clickCloseBtnHandler.bind(this);
     this._changeCommentEmojiHandler = this._changeCommentEmojiHandler.bind(this);
@@ -34,10 +39,10 @@ class FilmDetailsPopup extends FilmComponent {
    * Возвращает шаблон комментариев к фильму
    * @return {string}
    */
-  _getCommentsTemplate() {
+  get _commentsTemplate() {
     const comments = this._comments.map((comment) => `
       <li class="film-details__comment">
-        <span class="film-details__comment-emoji">${mockFilmData.Emojis[comment.emoji]}</span>
+        <span class="film-details__comment-emoji">${getEmoji([comment.emoji])}</span>
         <div>
           <p class="film-details__comment-text">${comment.text}</p>
           <p class="film-details__comment-info">
@@ -55,7 +60,7 @@ class FilmDetailsPopup extends FilmComponent {
    * Возвращает шаблон выбора оценки фильма
    * @return {string}
    */
-  _getUserRatingScoreTemplate() {
+  get _ratingPickerTemplate() {
     const AMOUNT_OF_VARIANTS = 9;
     let inputs = ``;
 
@@ -117,7 +122,7 @@ class FilmDetailsPopup extends FilmComponent {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
-                  <td class="film-details__cell">${moment(this._premiereDate).format(`DD MMMM YYYY`)}</td>
+                  <td class="film-details__cell">${moment(this._releaseDate).format(`DD MMMM YYYY`)}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>
@@ -149,7 +154,7 @@ class FilmDetailsPopup extends FilmComponent {
           </section>
           <section class="film-details__comments-wrap">
             <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this._comments.length}</span></h3>
-            <ul class="film-details__comments-list">${this._getCommentsTemplate()}</ul>
+            <ul class="film-details__comments-list">${this._commentsTemplate}</ul>
             <div class="film-details__new-comment">
               <div>
                 <label for="add-emoji" class="film-details__add-emoji-label">😐</label>
@@ -186,7 +191,7 @@ class FilmDetailsPopup extends FilmComponent {
                 <h3 class="film-details__user-rating-title">${this._title}</h3>
 
                 <p class="film-details__user-rating-feelings">How you feel it?</p>
-                <div class="film-details__user-rating-score">${this._getUserRatingScoreTemplate()}</div>
+                <div class="film-details__user-rating-score">${this._ratingPickerTemplate}</div>
               </section>
             </div>
           </section>
@@ -201,8 +206,8 @@ class FilmDetailsPopup extends FilmComponent {
    * Возвращает обновленные данные о фильме
    * @return {object}
    */
-  _getNewFilmData() {
-    const newFilmPopupData = {
+  get _partOfFilmData() {
+    const partOfFilmData = {
       rating: this._rating,
       comments: this._comments,
       isFavorite: this._isFavorite,
@@ -210,46 +215,140 @@ class FilmDetailsPopup extends FilmComponent {
       inWatchlist: this._inWatchlist
     };
 
-    return newFilmPopupData;
+    return partOfFilmData;
   }
 
   /**
    * Задает колбэк закрытия попапа фильма
    * @param {Function} callback - колбэк
    */
-  set onCloseBtnClick(callback) {
-    this._onCloseBtnClick = callback;
+  set onClose(callback) {
+    this._onClose = callback;
+  }
+
+  /**
+   * Задает колбэк отправки комментария о фильме
+   * @param {Function} callback - колбэк
+   */
+  set onSubmitComment(callback) {
+    this._onSubmitComment = callback;
+  }
+
+  /**
+   * Задает колбэк отправки оценки фильма
+   * @param {Function} callback - колбэк
+   */
+  set onSubmitRating(callback) {
+    this._onSubmitRating = callback;
   }
 
   /**
    * Обработчик клика по кнопке закрытия попапа
    */
   _clickCloseBtnHandler() {
-    const newFilmData = this._getNewFilmData();
+    const updatedFilmData = this._partOfFilmData;
 
-    if (this._onCloseBtnClick && typeof this._onCloseBtnClick === `function`) {
-      this._onCloseBtnClick(newFilmData);
+    if (typeof this._onClose === `function`) {
+      this._onClose(updatedFilmData);
     }
   }
 
+  blockCommentForm() {
+    const input = this._element.querySelector(`.film-details__comment-input`);
+    const emojiPicker = this._element.querySelector(`.film-details__add-emoji`);
+
+    input.disabled = true;
+    emojiPicker.disabled = true;
+  }
+
+  unblockCommentForm() {
+    const input = this._element.querySelector(`.film-details__comment-input`);
+    const emojiPicker = this._element.querySelector(`.film-details__add-emoji`);
+
+    input.disabled = false;
+    emojiPicker.disabled = false;
+  }
   /**
    * Сбрасывает форму добавления комментариев в изначальное состояние
    */
-  _resetNewCommentForm() {
-    const newCommentInput = this._element.querySelector(`.film-details__comment-input`);
-    const newCommentEmojiPicker = this._element.querySelector(`.film-details__add-emoji-label`);
+  resetNewCommentForm() {
+    const input = this._element.querySelector(`.film-details__comment-input`);
+    const neutralFaceEmojiItem = this._element.querySelector(`.film-details__emoji-item:nth-of-type(2)`);
+    const emojiPickerLabel = this._element.querySelector(`.film-details__add-emoji-label`);
 
-    newCommentInput.value = ``;
-    newCommentInput.blur();
-    newCommentEmojiPicker.innerHTML = mockFilmData.Emojis[`neutral-face`];
+    input.value = ``;
+    input.blur();
+    neutralFaceEmojiItem.checked = true;
+    emojiPickerLabel.innerHTML = getEmoji(`neutral-face`);
+  }
+
+  showErrorInCommentForm() {
+    const input = this._element.querySelector(`.film-details__comment-input`);
+
+    this.shake(input);
+    input.style.borderColor = `red`;
+  }
+
+  hideErrorInCommentForm() {
+    const input = this._element.querySelector(`.film-details__comment-input`);
+    input.style.borderColor = ``;
+  }
+
+  blockRatingPicker() {
+    const inputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
+    inputs.forEach((input) => (input.disabled = true));
+  }
+
+  unblockRatingPicker() {
+    const inputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
+    inputs.forEach((input) => (input.disabled = false));
+  }
+
+  showErrorInRatingPicker() {
+    const ratingPicker = this._element.querySelector(`.film-details__user-rating-score`);
+    const labels = this._element.querySelectorAll(`.film-details__user-rating-label`);
+
+    this.shake(ratingPicker);
+    labels.forEach((label) => (label.style.backgroundColor = `red`));
+  }
+
+  hideErrorInRatingPicker() {
+    const labels = this._element.querySelectorAll(`.film-details__user-rating-label`);
+
+    labels.forEach((label) => (label.style.backgroundColor = ``));
   }
 
   /**
    * Перерисовывает список комментариев
    */
-  _updateCommentsList() {
-    const comments = this.element.querySelector(`.film-details__comments-list`);
-    comments.innerHTML = `${this._getCommentsTemplate()}`;
+  updateCommentsList({
+    comments
+  }) {
+    this._comments = comments;
+
+    const commentsList = this.element.querySelector(`.film-details__comments-list`);
+    commentsList.innerHTML = `${this._commentsTemplate}`;
+  }
+
+  /**
+   * Перерисовывает блок с оценкой фильма
+   */
+  updateRating({
+    rating
+  }) {
+    this._rating = rating;
+
+    const userRating = this._element.querySelector(`.film-details__user-rating`);
+    userRating.innerHTML = `Your rate ${this._rating}`;
+  }
+
+  shake(element) {
+    const ANIMATION_TIMEOUT = 1000;
+    element.classList.add(`shake`);
+
+    setTimeout(() => {
+      element.classList.remove(`shake`);
+    }, ANIMATION_TIMEOUT);
   }
 
   /**
@@ -259,7 +358,7 @@ class FilmDetailsPopup extends FilmComponent {
    */
   _changeCommentEmojiHandler(event) {
     const emojiPicker = this._element.querySelector(`.film-details__add-emoji-label`);
-    emojiPicker.innerHTML = mockFilmData.Emojis[event.target.value];
+    emojiPicker.innerHTML = getEmoji(event.target.value);
   }
 
   /**
@@ -267,29 +366,25 @@ class FilmDetailsPopup extends FilmComponent {
    * @param {event} event
    */
   _submitCommentHandler(event) {
+    this.hideErrorInCommentForm();
+
     const isControlOrCmdKey = isControlKey(event) || isCmdKey(event);
-    const submitCommentHotkeys = isControlOrCmdKey && isEnterKey(event);
+    const submitCommentHotkeysPressed = isControlOrCmdKey && isEnterKey(event);
 
-    if (submitCommentHotkeys) {
+    if (submitCommentHotkeysPressed) {
+      this.blockCommentForm();
 
-      this._comments.push({
-        emoji: this._element.querySelector(`.film-details__emoji-item:checked`).value,
-        text: event.currentTarget.value,
+      const newComment = new AdapterComment({
         author: `User name`,
+        emotion: this._element.querySelector(`.film-details__emoji-item:checked`).value,
+        comment: event.currentTarget.value,
         date: Date.now()
       });
 
-      this._resetNewCommentForm();
-      this._updateCommentsList();
+      if (typeof this._onSubmitComment === `function`) {
+        this._onSubmitComment(newComment);
+      }
     }
-  }
-
-  /**
-   * Перерисовывает блок с оценкой фильма
-   */
-  _updateRating() {
-    const userRating = this._element.querySelector(`.film-details__user-rating`);
-    userRating.innerHTML = `Your rate ${this._rating}`;
   }
 
   /**
@@ -297,8 +392,13 @@ class FilmDetailsPopup extends FilmComponent {
    * @param {event} event
    */
   _clickUserRatingInputHandler(event) {
-    this._rating = +event.currentTarget.value;
-    this._updateRating();
+    this.hideErrorInRatingPicker();
+    this.blockRatingPicker();
+    const newRating = +event.currentTarget.value;
+
+    if (typeof this._onSubmitRating === `function`) {
+      this._onSubmitRating(newRating);
+    }
   }
 
   /**
@@ -332,4 +432,4 @@ class FilmDetailsPopup extends FilmComponent {
   }
 }
 
-export default FilmDetailsPopup;
+export default FilmPopup;
