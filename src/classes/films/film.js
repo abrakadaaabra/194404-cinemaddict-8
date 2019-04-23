@@ -37,7 +37,7 @@ class Film extends FilmComponent {
         <h3 class="film-card__title">${this._title}</h3>
         <p class="film-card__rating">${this._averageRating}</p>
         <p class="film-card__info">
-          <span class="film-card__year">${moment(this._releaseYear).format(`YYYY`)}</span>
+          <span class="film-card__year">${moment(this._releaseDate).format(`YYYY`)}</span>
           <span class="film-card__duration">${moment.duration(this._duration, `minutes`).hours()}h ${moment.duration(this._duration, `minutes`).minutes()}m</span>
           <span class="film-card__genre">${this._genre.join(`, `)}</span>
         </p>

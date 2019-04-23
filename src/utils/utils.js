@@ -74,6 +74,14 @@ const getRandomArrayElements = (array, amountOfElements) => getShuffledArray(arr
  */
 const getRandomDateInRange = (max, min = 0) => Date.now() + getRandomIntegerInRange(max, min) * 24 * 60 * 60 * 1000;
 
+const Emojis = {
+  'sleeping': `😴`,
+  'neutral-face': `😐`,
+  'grinning': `😀`,
+};
+
+const getEmoji = (title) => Emojis[title];
+
 export {
   getRandomNumber,
   getRandomIntegerInRange,
@@ -81,5 +89,6 @@ export {
   getRandomArrayElements,
   getRandomBoolean,
   getShuffledArray,
-  getRandomDateInRange
+  getRandomDateInRange,
+  getEmoji
 };
