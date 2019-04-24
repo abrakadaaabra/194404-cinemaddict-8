@@ -1,4 +1,4 @@
-import AdapterFilm from './adapter-film';
+import AdapterFilm from './adapters/adapter-film';
 
 const Method = {
   GET: `GET`,

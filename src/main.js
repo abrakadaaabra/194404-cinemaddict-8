@@ -3,6 +3,7 @@ import {initializeFilms} from './films/initialize-films';
 import initializeFilters from './filters/initialize-filters';
 import initializeStatistics from './statistics/initialize-statistics';
 import {initializeSearch} from './search/initialize-search';
+import {VISUALLY_HIDDEN_CLASS} from './utils/utils';
 
 const preloader = document.querySelector(`.films-list__title`);
 
@@ -18,11 +19,11 @@ const api = new API({
 
 const showPreloader = (description) => {
   preloader.innerHTML = description;
-  preloader.classList.remove(`visually-hidden`);
+  preloader.classList.remove(VISUALLY_HIDDEN_CLASS);
 };
 
 const hidePreloader = () => {
-  preloader.classList.add(`visually-hidden`);
+  preloader.classList.add(VISUALLY_HIDDEN_CLASS);
 };
 
 const footerStatisticsElement = document.querySelector(`.footer__statistics p`);

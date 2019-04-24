@@ -1,4 +1,5 @@
 import Statistics from "./statistics";
+import {VISUALLY_HIDDEN_CLASS} from "../utils/utils";
 
 const filmsSection = document.querySelector(`.films`);
 const main = document.querySelector(`main`);
@@ -13,11 +14,11 @@ const initStatistics = (data) => {
 
 const renderStatistics = () => {
   const statisticsButton = document.querySelector(`.main-navigation__item--additional`);
-  statisticsButton.addEventListener(`click`, clickStatsButtonHandler);
+  statisticsButton.addEventListener(`click`, statisticsButtonClickHandler);
 };
 
-const clickStatsButtonHandler = () => {
-  filmsSection.classList.add(`visually-hidden`);
+const statisticsButtonClickHandler = () => {
+  filmsSection.classList.add(VISUALLY_HIDDEN_CLASS);
   if (!statistics) {
     statistics = new Statistics(filmsData);
   } else {

@@ -1,5 +1,5 @@
 import Component from "../component";
-import AdapterComment from "../adapter-comment";
+import AdapterComment from "../adapters/adapter-comment";
 import moment from "moment";
 
 import {
@@ -15,7 +15,7 @@ import {
   convertHtmlToText
 } from "../utils/utils";
 
-const AMOUNT_OF_RATING_VARIANTS = 9;
+const MAX_RATING_SCORE = 9;
 
 /**
  * Класс попапа с подробной информацией о фильме
@@ -60,15 +60,16 @@ class FilmPopup extends Component {
     this._onAddToFavorite = null;
     this._onClose = null;
 
-    this._changeCommentEmojiHandler = this._changeCommentEmojiHandler.bind(this);
-    this._submitCommentHandler = this._submitCommentHandler.bind(this);
-    this._clickDeleteCommentButtonHandler = this._clickDeleteCommentButtonHandler.bind(this);
-    this._clickUserRatingInputHandler = this._clickUserRatingInputHandler.bind(this);
-    this._clickAddToWatchlistButtonHandler = this._clickAddToWatchlistButtonHandler.bind(this);
-    this._clickMarkAsWatchedButtonHandler = this._clickMarkAsWatchedButtonHandler.bind(this);
-    this._clickAddToFavoriteButtonHandler = this._clickAddToFavoriteButtonHandler.bind(this);
-    this._clickCloseBtnHandler = this._clickCloseBtnHandler.bind(this);
+    this._commentEmojiChangeHandler = this._commentEmojiChangeHandler.bind(this);
+    this._commentSubmitHandler = this._commentSubmitHandler.bind(this);
+    this._deleteCommentButtonClickHandler = this._deleteCommentButtonClickHandler.bind(this);
+    this._userRatingInputClickHandler = this._userRatingInputClickHandler.bind(this);
+    this._addToWatchlistButtonClickHandler = this._addToWatchlistButtonClickHandler.bind(this);
+    this._markAsWatchedButtonClickHandler = this._markAsWatchedButtonClickHandler.bind(this);
+    this._addToFavoriteButtonClickHandler = this._addToFavoriteButtonClickHandler.bind(this);
+    this._closeBtnClickHandler = this._closeBtnClickHandler.bind(this);
     this._popupKeydownHandler = this._popupKeydownHandler.bind(this);
+
   }
 
   /**
@@ -97,7 +98,7 @@ class FilmPopup extends Component {
   get _ratingPickerTemplate() {
     let inputs = ``;
 
-    for (let i = 1; i <= AMOUNT_OF_RATING_VARIANTS; i++) {
+    for (let i = 1; i <= MAX_RATING_SCORE; i++) {
       inputs += `
           <input type="radio" name="score" class="film-details__user-rating-input visually-hidden"${this._rating === i ? ` checked` : ``} value="${i}" id="rating-${i}">
           <label class="film-details__user-rating-label" for="rating-${i}">${i}</label>
@@ -252,24 +253,38 @@ class FilmPopup extends Component {
    * Возвращает обновленные данные о фильме
    * @return {object}
    */
-  get _partOfFilmData() {
-    const partOfFilmData = {
+  get _userData() {
+    return {
       rating: this._rating,
       comments: this._comments,
       isFavorite: this._isFavorite,
       isWatched: this._isWatched,
       inWatchlist: this._inWatchlist
     };
-
-    return partOfFilmData;
   }
 
   /**
-   * Задает колбэк закрытия попапа фильма
+   * Задает колбэк отправки комментария о фильме
    * @param {Function} callback - колбэк
    */
-  set onClose(callback) {
-    this._onClose = callback;
+  set onSubmitComment(callback) {
+    this._onSubmitComment = callback;
+  }
+
+  /**
+   * Задает колбэк отправки комментария о фильме
+   * @param {Function} callback - колбэк
+   */
+  set onDeleteComment(callback) {
+    this._onDeleteComment = callback;
+  }
+
+  /**
+   * Задает колбэк отправки оценки фильма
+   * @param {Function} callback - колбэк
+   */
+  set onSubmitRating(callback) {
+    this._onSubmitRating = callback;
   }
 
   /**
@@ -297,27 +312,11 @@ class FilmPopup extends Component {
   }
 
   /**
-   * Задает колбэк отправки комментария о фильме
+   * Задает колбэк закрытия попапа фильма
    * @param {Function} callback - колбэк
    */
-  set onSubmitComment(callback) {
-    this._onSubmitComment = callback;
-  }
-
-  /**
-   * Задает колбэк отправки комментария о фильме
-   * @param {Function} callback - колбэк
-   */
-  set onDeleteComment(callback) {
-    this._onDeleteComment = callback;
-  }
-
-  /**
-   * Задает колбэк отправки оценки фильма
-   * @param {Function} callback - колбэк
-   */
-  set onSubmitRating(callback) {
-    this._onSubmitRating = callback;
+  set onClose(callback) {
+    this._onClose = callback;
   }
 
   unblockCommentForm() {
@@ -326,6 +325,11 @@ class FilmPopup extends Component {
 
     input.disabled = false;
     emojiPicker.disabled = false;
+  }
+
+  unblockRatingPicker() {
+    const inputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
+    inputs.forEach((input) => (input.disabled = false));
   }
 
   /**
@@ -339,7 +343,7 @@ class FilmPopup extends Component {
     input.value = ``;
     input.blur();
     neutralFaceEmojiItem.checked = true;
-    emojiPickerLabel.innerHTML = getEmoji(`neutral-face`);
+    emojiPickerLabel.innerHTML = getEmoji();
   }
 
   showErrorInCommentForm() {
@@ -348,11 +352,6 @@ class FilmPopup extends Component {
     this.unblockCommentForm();
     this._shake(input);
     input.style.borderColor = `red`;
-  }
-
-  unblockRatingPicker() {
-    const inputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
-    inputs.forEach((input) => (input.disabled = false));
   }
 
   showErrorInRatingPicker() {
@@ -365,42 +364,35 @@ class FilmPopup extends Component {
   }
 
   updateElement() {
-    this.updateComments();
-    this.updateRating();
+    this._updateComments();
+    this._updateRating();
   }
 
+  close() {
+    const userData = this._userData;
+
+    if (typeof this._onClose === `function`) {
+      this._onClose(userData);
+    }
+  }
 
   /**
    * Перерисовывает список комментариев
    */
-  updateComments() {
+  _updateComments() {
     const commentsCount = this._element.querySelector(`.film-details__comments-count`);
     const commentsList = this._element.querySelector(`.film-details__comments-list`);
+
     commentsCount.innerHTML = this._comments.length;
     commentsList.innerHTML = `${this._commentsTemplate}`;
-  }
-
-  update(data) {
-    this._rating = data.rating;
-    this._comments = data.comments;
-    this._isFavorite = data.isFavorite;
-    this._isWatched = data.isWatched;
-    this._inWatchlist = data.inWatchlist;
-  }
-
-  close() {
-    const updatedFilmData = this._partOfFilmData;
-
-    if (typeof this._onClose === `function`) {
-      this._onClose(updatedFilmData);
-    }
   }
 
   /**
    * Перерисовывает блок с оценкой фильма
    */
-  updateRating() {
+  _updateRating() {
     const userRating = this._element.querySelector(`.film-details__user-rating`);
+
     userRating.innerHTML = `Your rate ${this._rating}`;
   }
 
@@ -412,14 +404,14 @@ class FilmPopup extends Component {
     emojiPicker.disabled = true;
   }
 
-  _hideErrorInCommentForm() {
-    const input = this._element.querySelector(`.film-details__comment-input`);
-    input.style.borderColor = ``;
-  }
-
   _blockRatingPicker() {
     const inputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
     inputs.forEach((input) => (input.disabled = true));
+  }
+
+  _hideErrorInCommentForm() {
+    const input = this._element.querySelector(`.film-details__comment-input`);
+    input.style.borderColor = ``;
   }
 
   _hideErrorInRatingPicker() {
@@ -437,52 +429,66 @@ class FilmPopup extends Component {
     }, ANIMATION_TIMEOUT);
   }
 
+  _showRatingSection() {
+    const ratingWrapElement = this._element.querySelector(`.film-details__user-rating-wrap`);
+
+    ratingWrapElement.classList.remove(VISUALLY_HIDDEN_CLASS);
+  }
+
+  update(data) {
+    this._rating = data.rating;
+    this._comments = data.comments;
+    this._isFavorite = data.isFavorite;
+    this._isWatched = data.isWatched;
+    this._inWatchlist = data.inWatchlist;
+  }
+
   /**
    * Навешивает обработчики событий на элементы попапа фильма
    */
   _addEventHandlers() {
-    const popupCloseBtn = this._element.querySelector(`.film-details__close-btn`);
-    const userRatingInputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
-    const commentInput = this._element.querySelector(`.film-details__comment-input`);
-    const emojiListItems = this._element.querySelectorAll(`.film-details__emoji-item`);
+    const emojiElements = this._element.querySelectorAll(`.film-details__emoji-item`);
+    const commentInputElement = this._element.querySelector(`.film-details__comment-input`);
+    const deleteCommentButtonElement = this._element.querySelector(`.film-details__watched-reset`);
+    const userRatingInputsElements = this._element.querySelectorAll(`.film-details__user-rating-input`);
     const addToWatchlistButtonElement = this._element.querySelector(`.film-details__control-input[name="watchlist"]`);
     const markAsWatchedButtonElement = this._element.querySelector(`.film-details__control-input[name="watched"]`);
     const addToFavoriteButtonElement = this._element.querySelector(`.film-details__control-input[name="favorite"]`);
-    const deleteCommentButtonElement = this._element.querySelector(`.film-details__watched-reset`);
+    const closeButtonElement = this._element.querySelector(`.film-details__close-btn`);
 
-    popupCloseBtn.addEventListener(`click`, this._clickCloseBtnHandler);
-    userRatingInputs.forEach((input) => input.addEventListener(`click`, this._clickUserRatingInputHandler));
-    commentInput.addEventListener(`keydown`, this._submitCommentHandler);
-    emojiListItems.forEach((emoji) => emoji.addEventListener(`click`, this._changeCommentEmojiHandler));
-    addToWatchlistButtonElement.addEventListener(`click`, this._clickAddToWatchlistButtonHandler);
-    markAsWatchedButtonElement.addEventListener(`click`, this._clickMarkAsWatchedButtonHandler);
-    addToFavoriteButtonElement.addEventListener(`click`, this._clickAddToFavoriteButtonHandler);
-    deleteCommentButtonElement.addEventListener(`click`, this._clickDeleteCommentButtonHandler);
-    document.addEventListener(`keydown`, this._popupKeydownHandler);
+    emojiElements.forEach((emoji) => emoji.addEventListener(`click`, this._commentEmojiChangeHandler));
+    commentInputElement.addEventListener(`keydown`, this._commentSubmitHandler);
+    deleteCommentButtonElement.addEventListener(`click`, this._deleteCommentButtonClickHandler);
+    userRatingInputsElements.forEach((input) => input.addEventListener(`click`, this._userRatingInputClickHandler));
+    addToWatchlistButtonElement.addEventListener(`click`, this._addToWatchlistButtonClickHandler);
+    markAsWatchedButtonElement.addEventListener(`click`, this._markAsWatchedButtonClickHandler);
+    addToFavoriteButtonElement.addEventListener(`click`, this._addToFavoriteButtonClickHandler);
+    closeButtonElement.addEventListener(`click`, this._closeBtnClickHandler);
+    document.body.addEventListener(`keydown`, this._popupKeydownHandler);
   }
 
   /**
    * Удаляет обработчики события с элементов попапа фильма
    */
   _removeEventHandlers() {
-    const popupCloseBtn = this._element.querySelector(`.film-details__close-btn`);
-    const userRatingInputs = this._element.querySelectorAll(`.film-details__user-rating-input`);
-    const commentInput = this._element.querySelector(`.film-details__comment-input`);
-    const emojiListItems = this._element.querySelectorAll(`.film-details__emoji-item`);
+    const emojiElements = this._element.querySelectorAll(`.film-details__emoji-item`);
+    const commentInputElement = this._element.querySelector(`.film-details__comment-input`);
+    const deleteCommentButtonElement = this._element.querySelector(`.film-details__watched-reset`);
+    const userRatingInputsElements = this._element.querySelectorAll(`.film-details__user-rating-input`);
     const addToWatchlistButtonElement = this._element.querySelector(`.film-details__control-input[name="watchlist"]`);
     const markAsWatchedButtonElement = this._element.querySelector(`.film-details__control-input[name="watched"]`);
     const addToFavoriteButtonElement = this._element.querySelector(`.film-details__control-input[name="favorite"]`);
-    const deleteCommentButtonElement = this._element.querySelector(`.film-details__watched-reset`);
+    const closeButtonElement = this._element.querySelector(`.film-details__close-btn`);
 
-    popupCloseBtn.removeEventListener(`click`, this._clickCloseBtnHandler);
-    userRatingInputs.forEach((input) => input.removeEventListener(`click`, this._clickUserRatingInputHandler));
-    commentInput.removeEventListener(`keydown`, this._submitCommentHandler);
-    emojiListItems.forEach((emoji) => emoji.removeEventListener(`click`, this._changeCommentEmojiHandler));
-    addToWatchlistButtonElement.removeEventListener(`click`, this._clickAddToWatchlistButtonHandler);
-    markAsWatchedButtonElement.removeEventListener(`click`, this._clickMarkAsWatchedButtonHandler);
-    addToFavoriteButtonElement.removeEventListener(`click`, this._clickAddToFavoriteButtonHandler);
-    deleteCommentButtonElement.removeEventListener(`click`, this._clickDeleteCommentButtonHandler);
-    document.removeEventListener(`keydown`, this._popupKeydownHandler);
+    emojiElements.forEach((emoji) => emoji.removeEventListener(`click`, this._commentEmojiChangeHandler));
+    commentInputElement.removeEventListener(`keydown`, this._commentSubmitHandler);
+    deleteCommentButtonElement.removeEventListener(`click`, this._deleteCommentButtonClickHandler);
+    userRatingInputsElements.forEach((input) => input.removeEventListener(`click`, this._userRatingInputClickHandler));
+    addToWatchlistButtonElement.removeEventListener(`click`, this._addToWatchlistButtonClickHandler);
+    markAsWatchedButtonElement.removeEventListener(`click`, this._markAsWatchedButtonClickHandler);
+    addToFavoriteButtonElement.removeEventListener(`click`, this._addToFavoriteButtonClickHandler);
+    closeButtonElement.removeEventListener(`click`, this._closeBtnClickHandler);
+    document.body.removeEventListener(`keydown`, this._popupKeydownHandler);
   }
 
   /**
@@ -490,7 +496,7 @@ class FilmPopup extends Component {
    * Обработчик клика по эмоджи реакции на фильм
    * @param {event} event
    */
-  _changeCommentEmojiHandler(event) {
+  _commentEmojiChangeHandler(event) {
     const emojiPicker = this._element.querySelector(`.film-details__add-emoji-label`);
     emojiPicker.innerHTML = getEmoji(event.target.value);
   }
@@ -499,8 +505,7 @@ class FilmPopup extends Component {
    * Обработчик отправки формы добавления комментариев
    * @param {event} event
    */
-  _submitCommentHandler(event) {
-
+  _commentSubmitHandler(event) {
     const isControlOrCmdKey = isControlKey(event) || isCmdKey(event);
     const submitCommentHotkeysPressed = isControlOrCmdKey && isEnterKey(event);
 
@@ -515,7 +520,7 @@ class FilmPopup extends Component {
         date: Date.now()
       });
 
-      this.showRatingSection();
+      this._showRatingSection();
 
       if (typeof this._onSubmitComment === `function`) {
         this._onSubmitComment(newComment);
@@ -523,17 +528,19 @@ class FilmPopup extends Component {
     }
   }
 
-  showRatingSection() {
-    const ratingWrapElement = this._element.querySelector(`.film-details__user-rating-wrap`);
+  _deleteCommentButtonClickHandler(event) {
+    event.preventDefault();
 
-    ratingWrapElement.classList.remove(VISUALLY_HIDDEN_CLASS);
+    if (typeof this._onDeleteComment === `function`) {
+      this._onDeleteComment();
+    }
   }
 
   /**
    * Обработчик клика по оценке фильма
    * @param {event} event
    */
-  _clickUserRatingInputHandler(event) {
+  _userRatingInputClickHandler(event) {
     this._hideErrorInRatingPicker();
     this._blockRatingPicker();
     const newRating = +event.currentTarget.value;
@@ -544,21 +551,10 @@ class FilmPopup extends Component {
   }
 
   /**
-   * Обработчик клика по кнопке закрытия попапа
-   */
-  _clickCloseBtnHandler() {
-    const updatedFilmData = this._partOfFilmData;
-
-    if (typeof this._onClose === `function`) {
-      this._onClose(updatedFilmData);
-    }
-  }
-
-  /**
    * Обработчик клика по кнопке добавления в список к просмотру
    * @param {event} event - событие клика
    */
-  _clickAddToWatchlistButtonHandler() {
+  _addToWatchlistButtonClickHandler() {
     if (typeof this._onAddToWatchlist === `function`) {
       this._onAddToWatchlist();
     }
@@ -568,7 +564,7 @@ class FilmPopup extends Component {
    * Обработчик клика по кнопке добавления в список просмотренных фильмов
    * @param {event} event - событие клика
    */
-  _clickMarkAsWatchedButtonHandler() {
+  _markAsWatchedButtonClickHandler() {
     if (typeof this._onMarkAsWatched === `function`) {
       this._onMarkAsWatched();
     }
@@ -578,32 +574,26 @@ class FilmPopup extends Component {
    * Обработчик клика по кнопке добавления в список избранного
    * @param {event} event - событие клика
    */
-  _clickAddToFavoriteButtonHandler() {
+  _addToFavoriteButtonClickHandler() {
     if (typeof this._onAddToFavorite === `function`) {
       this._onAddToFavorite();
     }
   }
 
-  _clickDeleteCommentButtonHandler(event) {
-    event.preventDefault();
-
-    if (typeof this._onDeleteComment === `function`) {
-      this._onDeleteComment();
-    }
+  /**
+   * Обработчик клика по кнопке закрытия попапа
+   */
+  _closeBtnClickHandler() {
+    this.close();
   }
 
   _popupKeydownHandler(event) {
     const isClosePopupKeyPressed = isEscapeKey(event);
 
     if (isClosePopupKeyPressed) {
-      const updatedFilmData = this._partOfFilmData;
-
-      if (typeof this._onClose === `function`) {
-        this._onClose(updatedFilmData);
-      }
+      this.close();
     }
   }
-
 
 }
 

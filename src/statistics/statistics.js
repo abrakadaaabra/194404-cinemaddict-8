@@ -18,7 +18,7 @@ class Statistics extends Component {
 
     this._chart = null;
 
-    this._clickStatisticsFilterHandler = this._clickStatisticsFilterHandler.bind(this);
+    this._statisticsFilterClickHandler = this._statisticsFilterClickHandler.bind(this);
   }
 
   _getUserRank() {
@@ -286,7 +286,7 @@ class Statistics extends Component {
   /**
    * Обработчик клика по фильтру статистики
    */
-  _clickStatisticsFilterHandler() {
+  _statisticsFilterClickHandler() {
     const activeFilter = this._element.querySelector(`.statistic__filters-input:checked`);
     const filterType = activeFilter.value;
 
@@ -315,14 +315,14 @@ class Statistics extends Component {
   _addEventHandlers() {
     const statisticsFiltrers = this._element.querySelectorAll(`.statistic__filters-input`);
     statisticsFiltrers.forEach((filter) => {
-      filter.addEventListener(`click`, this._clickStatisticsFilterHandler);
+      filter.addEventListener(`click`, this._statisticsFilterClickHandler);
     });
   }
 
   _removeEventHandlers() {
     const statisticsFiltrers = this._element.querySelectorAll(`.statistic__filters-input`);
     statisticsFiltrers.forEach((filter) => {
-      filter.removeEventListener(`click`, this._clickStatisticsFilterHandler);
+      filter.removeEventListener(`click`, this._statisticsFilterClickHandler);
     });
   }
 

@@ -3,6 +3,7 @@ import {
   initializeFilteredFilms
 } from "../films/initialize-films";
 import {clearSearch} from "../search/initialize-search";
+import {VISUALLY_HIDDEN_CLASS} from "../utils/utils";
 
 const filmsSection = document.querySelector(`.films`);
 const allFilmsContainer = document.querySelector(`.films .films-list__container`);
@@ -75,7 +76,7 @@ const createFilterInstance = (data, filmsData) => {
     if (statisticsSection) {
       statisticsSection.remove();
     }
-    filmsSection.classList.remove(`visually-hidden`);
+    filmsSection.classList.remove(VISUALLY_HIDDEN_CLASS);
 
     allFilmsContainer.innerHTML = ``;
     initializeFilteredFilms(filteredFilms);

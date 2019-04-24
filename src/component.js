@@ -34,19 +34,6 @@ class Component {
   }
 
   /**
-   * Создает и возвращает DOM-элемент, соответствующий компоненту
-   * @return {HTMLElement}
-   */
-  _createElement() {
-    const tmpElement = document.createElement(`div`);
-    tmpElement.innerHTML = this._template;
-
-    const element = tmpElement.firstElementChild;
-
-    return element;
-  }
-
-  /**
    * Создает DOM-элемент, записывает его в поле компонента,
    * затем навешивает обработчики событий на элемент и возвращает его.
    * @return {HTMLElement}
@@ -69,6 +56,24 @@ class Component {
   }
 
   /**
+   * Обновляет поля компонента
+   */
+  update() {}
+
+  /**
+   * Создает и возвращает DOM-элемент, соответствующий компоненту
+   * @return {HTMLElement}
+   */
+  _createElement() {
+    const tmpElement = document.createElement(`div`);
+    tmpElement.innerHTML = this._template;
+
+    const element = tmpElement.firstElementChild;
+
+    return element;
+  }
+
+  /**
    * Навешивает обработчики событий на элемент
    */
   _addEventHandlers() {}
@@ -77,12 +82,6 @@ class Component {
    * Удаляет обработчики события с элементов карточки фильма
    */
   _removeEventHandlers() {}
-
-
-  /**
-   * Обновляет поля компонента
-   */
-  update() {}
 }
 
 export default Component;

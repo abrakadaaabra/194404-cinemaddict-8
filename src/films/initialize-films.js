@@ -25,7 +25,7 @@ const initializeFilms = (data) => {
 
   updateShowMoreButton();
 
-  showMoreButtonElement.addEventListener(`click`, clickShowMoreButtonHandler);
+  showMoreButtonElement.addEventListener(`click`, showMoreButtonClickHandler);
 
   showNextFilms();
   showTopRatedFilms();
@@ -48,7 +48,7 @@ const updateShowMoreButton = () => {
   }
 };
 
-const clickShowMoreButtonHandler = () => {
+const showMoreButtonClickHandler = () => {
   showNextFilms();
 };
 
@@ -104,7 +104,6 @@ const createFilmInstance = (film, hideControls) => {
     }).then((newData) => {
       filmInstance.update(newData);
       filmInstance.updateElement();
-      // TODO: updateFilters
     }).catch((error) => {
       throw error;
     });
@@ -119,7 +118,6 @@ const createFilmInstance = (film, hideControls) => {
     }).then((newData) => {
       filmInstance.update(newData);
       filmInstance.updateElement();
-      // TODO: updateFilters
     }).catch((error) => {
       throw error;
     });
@@ -134,13 +132,11 @@ const createFilmInstance = (film, hideControls) => {
     }).then((newData) => {
       filmInstance.update(newData);
       filmInstance.updateElement();
-      // TODO: updateFilters
     }).catch((error) => {
       throw error;
     });
   };
 
-  // TODO: Нужно закрывать уже открытый попап
   filmInstance.onOpenPopup = () => {
     if (globalPopup) {
       globalPopup.close();
@@ -165,7 +161,6 @@ const createFilmPopupInstance = (filmInstance, film) => {
       data: film.compose()
     }).then((newData) => {
       popupInstance.update(newData);
-      // TODO: updateFilters
     }).catch((error) => {
       throw error;
     });
@@ -179,7 +174,6 @@ const createFilmPopupInstance = (filmInstance, film) => {
       data: film.compose()
     }).then((newData) => {
       popupInstance.update(newData);
-      // TODO: updateFilters
     }).catch((error) => {
       throw error;
     });
@@ -193,8 +187,6 @@ const createFilmPopupInstance = (filmInstance, film) => {
       data: film.compose()
     }).then((newData) => {
       popupInstance.update(newData);
-      // TODO:
-      // updateFilters
     }).catch((error) => {
       throw error;
     });

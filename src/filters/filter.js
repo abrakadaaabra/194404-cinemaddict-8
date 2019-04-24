@@ -20,7 +20,7 @@ class Filter extends Component {
 
     this._onFilterClick = null;
 
-    this._clickFilterHandler = this._clickFilterHandler.bind(this);
+    this._filterClickHandler = this._filterClickHandler.bind(this);
   }
 
   get _countTemplate() {
@@ -59,20 +59,20 @@ class Filter extends Component {
    * Навешивает обработчики событий на элемент фильтра
    */
   _addEventHandlers() {
-    this._element.addEventListener(`click`, this._clickFilterHandler);
+    this._element.addEventListener(`click`, this._filterClickHandler);
   }
 
   /**
    * Удаляет обработчики событий с элементов фильтра
    */
   _removeEventHandlers() {
-    this._element.removeEventListener(`click`, this._clickFilterHandler);
+    this._element.removeEventListener(`click`, this._filterClickHandler);
   }
 
   /**
    * Обработчик клика по фильтру
    */
-  _clickFilterHandler() {
+  _filterClickHandler() {
     if (typeof this._onFilterClick === `function`) {
       this._onFilterClick();
     }

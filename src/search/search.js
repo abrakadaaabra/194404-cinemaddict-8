@@ -6,7 +6,7 @@ class Search extends Component {
 
     this._onSearch = null;
 
-    this._changeSearchInputHandler = this._changeSearchInputHandler.bind(this);
+    this._searchInputChangeHandler = this._searchInputChangeHandler.bind(this);
   }
 
   get _template() {
@@ -32,15 +32,15 @@ class Search extends Component {
 
   _addEventHandlers() {
     const searchInput = this._element.querySelector(`.search__field`);
-    searchInput.addEventListener(`input`, this._changeSearchInputHandler);
+    searchInput.addEventListener(`input`, this._searchInputChangeHandler);
   }
 
   _removeEventHandlers() {
     const searchInput = this._element.querySelector(`.search__field`);
-    searchInput.removeEventListener(`input`, this._changeSearchInputHandler);
+    searchInput.removeEventListener(`input`, this._searchInputChangeHandler);
   }
 
-  _changeSearchInputHandler() {
+  _searchInputChangeHandler() {
     if (typeof this._onSearch === `function`) {
       this._onSearch();
     }

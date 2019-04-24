@@ -82,7 +82,7 @@ const Emojis = {
   'grinning': `😀`,
 };
 
-const getEmoji = (title) => Emojis[title];
+const getEmoji = (title = `neutral-face`) => Emojis[title];
 
 const convertHtmlToText = (html) => {
   const element = document.createElement(`div`);

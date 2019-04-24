@@ -14,7 +14,7 @@ class Film extends Component {
   /**
    * Создает экземпляр карточки фильма
    * @param {Object} data - данные о фильме
-   * @param {boolean} hideControls - нужно ли скрывать контроллы карточки фильма
+   * @param {boolean} hideControls - нужно ли скрывать контроллы карточки фильма (для самых комментируемых и топовых фильмов)
    */
   constructor(data, hideControls) {
     super();
@@ -30,7 +30,6 @@ class Film extends Component {
     this._inWatchlist = data.inWatchlist;
     this._comments = data.comments;
     this._poster = data.poster;
-    // TODO: Не забыть убрать popup, если не понадобится
     this._popup = null;
     this._hideControls = hideControls;
 
@@ -39,10 +38,10 @@ class Film extends Component {
     this._onMarkAsWatched = null;
     this._onAddToFavorite = null;
 
-    this._clickCommentsCounterHandler = this._clickCommentsCounterHandler.bind(this);
-    this._clickAddToWatchlistButtonHandler = this._clickAddToWatchlistButtonHandler.bind(this);
-    this._clickMarkAsWatchedButtonHandler = this._clickMarkAsWatchedButtonHandler.bind(this);
-    this._clickAddToFavoriteButtonHandler = this._clickAddToFavoriteButtonHandler.bind(this);
+    this._commentsCounterClickHandler = this._commentsCounterClickHandler.bind(this);
+    this._addToWatchlistButtonClickHandler = this._addToWatchlistButtonClickHandler.bind(this);
+    this._markAsWatchedButtonClickHandler = this._markAsWatchedButtonClickHandler.bind(this);
+    this._addToFavoriteButtonClickHandler = this._addToFavoriteButtonClickHandler.bind(this);
   }
 
   /**
@@ -83,7 +82,7 @@ class Film extends Component {
 
   /**
    * Записывает в поле ссылку на экземпляр попапа с информацией о фильме
-   * @param {FilmPopup} popupInstance
+   * @param {FilmPopup} popupInstance - экземпляр попапа
    */
   set popup(popupInstance) {
     this._popup = popupInstance;
@@ -125,14 +124,14 @@ class Film extends Component {
    * Частично обновляет элемент карточки фильма в DOM
    */
   updateElement() {
-    this.updateCardControls();
-    this.updateComments();
+    this._updateCardControls();
+    this._updateComments();
   }
 
   /**
    * Обновляет кнопки добавления фильма в списки (к просмотру, просмотренные, избранные)
    */
-  updateCardControls() {
+  _updateCardControls() {
     const addToWatchlistButtonElement = this._element.querySelector(`.film-card__controls-item--add-to-watchlist`);
     const markAsWatchedButtonElement = this._element.querySelector(`.film-card__controls-item--mark-as-watched`);
     const addToFavoriteButtonElement = this._element.querySelector(`.film-card__controls-item--favorite`);
@@ -143,9 +142,18 @@ class Film extends Component {
   }
 
   /**
+   * Переключает состояние кнопки добавления фильма в списки
+   * @param {HTMLElement} buttonElement - DOM-элемент кнопки
+   * @param {boolean} condition - проверяемое свойство, от которого зависит состояние кнопки
+   */
+  _toggleButtonElementBorder(buttonElement, condition) {
+    buttonElement.style.border = condition ? `1px solid #f5df00` : `0 none`;
+  }
+
+  /**
    * Обновляет счетчик комментариев
    */
-  updateComments() {
+  _updateComments() {
     const commentsCounterElement = this._element.querySelector(`.film-card__comments`);
 
     commentsCounterElement.innerHTML = `${this._comments.length} comments`;
@@ -159,15 +167,6 @@ class Film extends Component {
   }
 
   /**
-   * Переключает состояние кнопки добавления фильма в списки
-   * @param {HTMLElement} buttonElement - DOM-элемент кнопки
-   * @param {boolean} condition - проверяемое свойство, от которого зависит состояние кнопки
-   */
-  _toggleButtonElementBorder(buttonElement, condition) {
-    buttonElement.style.border = condition ? `1px solid #f5df00` : `0 none`;
-  }
-
-  /**
    * Навешивает обработчики событий на элементы карточки фильма
    */
   _addEventHandlers() {
@@ -176,10 +175,10 @@ class Film extends Component {
     const markAsWatchedButtonElement = this._element.querySelector(`.film-card__controls-item--mark-as-watched`);
     const addToFavoriteButtonElement = this._element.querySelector(`.film-card__controls-item--favorite`);
 
-    commentsCountElement.addEventListener(`click`, this._clickCommentsCounterHandler);
-    addToWatchlistButtonElement.addEventListener(`click`, this._clickAddToWatchlistButtonHandler);
-    markAsWatchedButtonElement.addEventListener(`click`, this._clickMarkAsWatchedButtonHandler);
-    addToFavoriteButtonElement.addEventListener(`click`, this._clickAddToFavoriteButtonHandler);
+    commentsCountElement.addEventListener(`click`, this._commentsCounterClickHandler);
+    addToWatchlistButtonElement.addEventListener(`click`, this._addToWatchlistButtonClickHandler);
+    markAsWatchedButtonElement.addEventListener(`click`, this._markAsWatchedButtonClickHandler);
+    addToFavoriteButtonElement.addEventListener(`click`, this._addToFavoriteButtonClickHandler);
   }
 
   /**
@@ -191,16 +190,16 @@ class Film extends Component {
     const markAsWatchedButtonElement = this._element.querySelector(`.film-card__controls-item--mark-as-watched`);
     const addToFavoriteButtonElement = this._element.querySelector(`.film-card__controls-item--favorite`);
 
-    commentsCountElement.removeEventListener(`click`, this._clickCommentsCounterHandler);
-    addToWatchlistButtonElement.removeEventListener(`click`, this._clickAddToWatchlistButtonHandler);
-    markAsWatchedButtonElement.removeEventListener(`click`, this._clickMarkAsWatchedButtonHandler);
-    addToFavoriteButtonElement.removeEventListener(`click`, this._clickAddToFavoriteButtonHandler);
+    commentsCountElement.removeEventListener(`click`, this._commentsCounterClickHandler);
+    addToWatchlistButtonElement.removeEventListener(`click`, this._addToWatchlistButtonClickHandler);
+    markAsWatchedButtonElement.removeEventListener(`click`, this._markAsWatchedButtonClickHandler);
+    addToFavoriteButtonElement.removeEventListener(`click`, this._addToFavoriteButtonClickHandler);
   }
 
   /**
    * Обработчик клика по блоку комментариев
    */
-  _clickCommentsCounterHandler() {
+  _commentsCounterClickHandler() {
     if (typeof this._onOpenPopup === `function`) {
       this._onOpenPopup();
     }
@@ -210,7 +209,7 @@ class Film extends Component {
    * Обработчик клика по кнопке добавления в список к просмотру
    * @param {event} event - событие клика
    */
-  _clickAddToWatchlistButtonHandler(event) {
+  _addToWatchlistButtonClickHandler(event) {
     event.preventDefault();
 
     if (typeof this._onAddToWatchlist === `function`) {
@@ -222,7 +221,7 @@ class Film extends Component {
    * Обработчик клика по кнопке добавления в список просмотренных фильмов
    * @param {event} event - событие клика
    */
-  _clickMarkAsWatchedButtonHandler(event) {
+  _markAsWatchedButtonClickHandler(event) {
     event.preventDefault();
 
     if (typeof this._onMarkAsWatched === `function`) {
@@ -234,13 +233,14 @@ class Film extends Component {
    * Обработчик клика по кнопке добавления в список избранного
    * @param {event} event - событие клика
    */
-  _clickAddToFavoriteButtonHandler(event) {
+  _addToFavoriteButtonClickHandler(event) {
     event.preventDefault();
 
     if (typeof this._onAddToFavorite === `function`) {
       this._onAddToFavorite();
     }
   }
+
 }
 
 export default Film;
