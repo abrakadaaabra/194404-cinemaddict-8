@@ -21,6 +21,25 @@ class Statistics extends Component {
     this._clickStatisticsFilterHandler = this._clickStatisticsFilterHandler.bind(this);
   }
 
+  _getUserRank() {
+    const amountOfWatchedFilms = this._filteredFilmsData.length;
+    let rank = ``;
+
+    switch (true) {
+      case amountOfWatchedFilms >= 1 && amountOfWatchedFilms <= 10:
+        rank = `Novice`;
+        break;
+      case amountOfWatchedFilms >= 11 && amountOfWatchedFilms <= 20:
+        rank = `Fan`;
+        break;
+      case amountOfWatchedFilms >= 21 :
+        rank = `Movie buff`;
+        break;
+    }
+
+    return rank;
+  }
+
   /**
    * Возвращает шаблон блока с количеством просмотренных фильмов
    * @return {string}
@@ -46,7 +65,7 @@ class Statistics extends Component {
     return `
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">Total duration</h4>
-        <p class="statistic__item-text">${moment.duration(totalDuration, `minutes`).hours()} <span class="statistic__item-description">h</span> ${moment.duration(totalDuration, `minutes`).minutes()} <span
+        <p class="statistic__item-text">${Math.floor(moment.duration(totalDuration, `minutes`).asHours())} <span class="statistic__item-description">h</span> ${moment.duration(totalDuration, `minutes`).minutes()} <span
             class="statistic__item-description">m</span></p>
       </li>
     `;
@@ -79,7 +98,7 @@ class Statistics extends Component {
 
     const statisticsTemplate = `
       <section class="statistic">
-        <p class="statistic__rank">Your rank <span class="statistic__rank-label">Sci-Fighter</span></p>
+        <p class="statistic__rank">Your rank <span class="statistic__rank-label">${this._getUserRank()}</span></p>
 
         <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
           <p class="statistic__filters-description">Show stats:</p>
@@ -327,6 +346,15 @@ class Statistics extends Component {
     this._chart.destroy();
     this._drawChart();
   }
+
+  update(filmsData) {
+    this._watchedFilmsData = filmsData.filter((film) => film.isWatched);
+    this._filteredFilmsData = [...this._watchedFilmsData];
+    this._amountOfFilmsGroupByGenres = this._getAmountOfFilmsGroupByGenres();
+    this._updateStatistics();
+    this._updateChart();
+  }
+
 }
 
 export default Statistics;
