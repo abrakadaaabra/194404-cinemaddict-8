@@ -14,32 +14,27 @@ class Filter extends Component {
   constructor(data) {
     super();
 
+    this._caption = data.caption;
+    this._type = data.type;
+    this._count = data.count;
+
     this._onFilterClick = null;
 
     this._clickFilterHandler = this._clickFilterHandler.bind(this);
-
-    this._caption = data.caption;
-    this._type = data.type;
-    this._href = data.href;
-    this._count = data.count;
-    this._isAdditional = data.isAdditional || false;
   }
 
+  get _countTemplate() {
+    return `<span class="main-navigation__item-count">${this._count}</span>`;
+  }
 
   /**
    * Возвращает шаблон фильтра
    * @return {string}
    */
   get _template() {
-    const getCountTemplate = () => `
-      <span class="main-navigation__item-count">${this._count}</span>
-    `;
-
-    const isAdditionalClass = this._isAdditional ? `main-navigation__item--additional` : ``;
-
     return `
-      <a href="#${this._caption}" class="main-navigation__item ${isAdditionalClass}">
-        ${this._caption} ${this._count ? getCountTemplate() : ``}
+      <a href="#${this._caption}" class="main-navigation__item">
+        ${this._caption} ${this._count ? this._countTemplate : ``}
       </a>
     `;
   }
@@ -61,15 +56,6 @@ class Filter extends Component {
   }
 
   /**
-   * Обработчик клика по фильтру
-   */
-  _clickFilterHandler() {
-    if (typeof this._onFilterClick === `function`) {
-      this._onFilterClick();
-    }
-  }
-
-  /**
    * Навешивает обработчики событий на элемент фильтра
    */
   _addEventHandlers() {
@@ -82,6 +68,16 @@ class Filter extends Component {
   _removeEventHandlers() {
     this._element.removeEventListener(`click`, this._clickFilterHandler);
   }
+
+  /**
+   * Обработчик клика по фильтру
+   */
+  _clickFilterHandler() {
+    if (typeof this._onFilterClick === `function`) {
+      this._onFilterClick();
+    }
+  }
+
 }
 
 export default Filter;

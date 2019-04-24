@@ -2,6 +2,8 @@
  * Модуль вспомогательных функций
  */
 
+const VISUALLY_HIDDEN_CLASS = `visually-hidden`;
+
 /**
  * Возвращает случайное число в диапазоне [min, max)
  * @param  {number} max - верхняя граница диапазона (не включается)
@@ -82,7 +84,14 @@ const Emojis = {
 
 const getEmoji = (title) => Emojis[title];
 
+const convertHtmlToText = (html) => {
+  const element = document.createElement(`div`);
+  element.innerHTML = html;
+  return element.textContent || ``;
+};
+
 export {
+  VISUALLY_HIDDEN_CLASS,
   getRandomNumber,
   getRandomIntegerInRange,
   getRandomArrayElement,
@@ -90,5 +99,6 @@ export {
   getRandomBoolean,
   getShuffledArray,
   getRandomDateInRange,
-  getEmoji
+  getEmoji,
+  convertHtmlToText
 };

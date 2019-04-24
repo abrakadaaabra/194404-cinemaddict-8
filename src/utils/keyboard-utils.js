@@ -23,8 +23,16 @@ const isCmdKey = (event) => event.metaKey || event.keyCode === 91 || event.which
  */
 const isEnterKey = (event) => event.key === `Enter` || event.keyCode === 13 || event.which === 13;
 
+/**
+ * Проверяет, что нажата клавиша Escape
+ * @param  {event} event - событие keyDown
+ * @return {boolean}
+ */
+const isEscapeKey = (event) => event.key === `Escape` || event.keyCode === 27 || event.which === 27;
+
 export {
   isControlKey,
   isCmdKey,
-  isEnterKey
+  isEnterKey,
+  isEscapeKey
 };
