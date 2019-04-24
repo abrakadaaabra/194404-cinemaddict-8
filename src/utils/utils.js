@@ -90,6 +90,47 @@ const convertHtmlToText = (html) => {
   return element.textContent || ``;
 };
 
+const showPreloader = (description) => {
+  const preloader = document.querySelector(`.films-list__title`);
+  preloader.innerHTML = description;
+  preloader.classList.remove(VISUALLY_HIDDEN_CLASS);
+};
+
+const hidePreloader = () => {
+  const preloader = document.querySelector(`.films-list__title`);
+  preloader.classList.add(VISUALLY_HIDDEN_CLASS);
+};
+
+const getUserRank = (films) => {
+  const amountOfWatchedFilms = films.filter((film) => film.isWatched).length;
+
+  let rank = ``;
+  switch (true) {
+    case amountOfWatchedFilms >= 1 && amountOfWatchedFilms <= 10:
+      rank = `Novice`;
+      break;
+    case amountOfWatchedFilms >= 11 && amountOfWatchedFilms <= 20:
+      rank = `Fan`;
+      break;
+    case amountOfWatchedFilms >= 21:
+      rank = `Movie buff`;
+      break;
+  }
+
+  return rank;
+};
+
+const renderUserRank = (films) => {
+  const userRankElement = document.querySelector(`.profile__rating`);
+
+  userRankElement.innerHTML = getUserRank(films);
+};
+
+const renderFooterStatistics = (films) => {
+  const footerStatisticsElement = document.querySelector(`.footer__statistics p`);
+  footerStatisticsElement.innerHTML = `${films.length} movies inside`;
+};
+
 export {
   VISUALLY_HIDDEN_CLASS,
   getRandomNumber,
@@ -100,5 +141,10 @@ export {
   getShuffledArray,
   getRandomDateInRange,
   getEmoji,
-  convertHtmlToText
+  convertHtmlToText,
+  showPreloader,
+  hidePreloader,
+  getUserRank,
+  renderUserRank,
+  renderFooterStatistics
 };

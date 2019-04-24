@@ -2,6 +2,7 @@ import Component from "../component";
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import moment from "moment";
+import {getUserRank} from "../utils/utils";
 
 class Statistics extends Component {
 
@@ -19,25 +20,6 @@ class Statistics extends Component {
     this._chart = null;
 
     this._statisticsFilterClickHandler = this._statisticsFilterClickHandler.bind(this);
-  }
-
-  _getUserRank() {
-    const amountOfWatchedFilms = this._filteredFilmsData.length;
-    let rank = ``;
-
-    switch (true) {
-      case amountOfWatchedFilms >= 1 && amountOfWatchedFilms <= 10:
-        rank = `Novice`;
-        break;
-      case amountOfWatchedFilms >= 11 && amountOfWatchedFilms <= 20:
-        rank = `Fan`;
-        break;
-      case amountOfWatchedFilms >= 21 :
-        rank = `Movie buff`;
-        break;
-    }
-
-    return rank;
   }
 
   /**
@@ -98,7 +80,7 @@ class Statistics extends Component {
 
     const statisticsTemplate = `
       <section class="statistic">
-        <p class="statistic__rank">Your rank <span class="statistic__rank-label">${this._getUserRank()}</span></p>
+        <p class="statistic__rank">Your rank <span class="statistic__rank-label">${getUserRank(this._watchedFilmsData)}</span></p>
 
         <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
           <p class="statistic__filters-description">Show stats:</p>

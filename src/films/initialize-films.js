@@ -1,6 +1,6 @@
 import Film from "./film";
 import FilmPopup from "./film-popup";
-import getApi from '../get-api';
+import getApi from '../api/get-api';
 import {
   VISUALLY_HIDDEN_CLASS
 } from "../utils/utils";

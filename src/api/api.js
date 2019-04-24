@@ -1,4 +1,4 @@
-import AdapterFilm from './adapters/adapter-film';
+import AdapterFilm from '../adapters/adapter-film';
 
 const Method = {
   GET: `GET`,
@@ -36,7 +36,10 @@ class API {
       .then(AdapterFilm.parseFilms);
   }
 
-  updateFilm({id, data}) {
+  updateFilm({
+    id,
+    data
+  }) {
     return this._load({
       url: `movies/${id}`,
       method: Method.PUT,
